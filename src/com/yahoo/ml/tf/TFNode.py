@@ -15,6 +15,7 @@ import logging
 import os
 import time
 from six.moves.queue import Queue, Empty
+from . import marker
 
 def hdfs_path(ctx, path):
   """Convenience function to create a Tensorflow-compatible absolute HDFS path from relative paths"""
@@ -102,6 +103,11 @@ def next_batch(mgr, batch_size, qname='input'):
             logging.info("next_batch() got None")
             queue.task_done()
             break;
+        elif type(item) is marker.EndPartition:
+            logging.info("next_batch() got EndPartition")
+            queue.task_done()
+            if len(batch) > 0:
+              break;
         else:
             # logging.info("next_batch() got {0}".format(item))
             batch.append(item)
