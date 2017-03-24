@@ -126,9 +126,9 @@ def map_fun(args, ctx):
 
       # Loop until the supervisor shuts down or 1000000 steps have completed.
       step = 0
-      tfnode = TFNode.TFNode(ctx.mgr, batch_size, args.mode == "train")
+      tfnode = TFNode.TFNode(ctx.mgr, args.mode == "train")
       # using feed_dict
-      batch_xs, batch_ys = feed_dict(tfnode.next_batch())
+      batch_xs, batch_ys = feed_dict(tfnode.next_batch(batch_size))
       while not sv.should_stop() and not tfnode.should_stop() and step < args.steps:
         # Run a training step asynchronously.
         # See `tf.train.SyncReplicasOptimizer` for additional details on how to
@@ -147,7 +147,7 @@ def map_fun(args, ctx):
           tfnode.batch_results(results)
           print("acc: {0}".format(acc))
 
-        batch_xs, batch_ys = feed_dict(tfnode.next_batch())
+        batch_xs, batch_ys = feed_dict(tfnode.next_batch(batch_size))
 
       if sv.should_stop() or step >= args.steps:
         tfnode.terminate()
