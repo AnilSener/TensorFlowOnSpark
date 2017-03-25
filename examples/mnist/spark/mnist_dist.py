@@ -126,14 +126,14 @@ def map_fun(args, ctx):
 
       # Loop until the supervisor shuts down or 1000000 steps have completed.
       step = 0
-      tfnode = TFNode.TFNode(ctx.mgr, args.mode == "train")
-      while not sv.should_stop() and not tfnode.should_stop() and step < args.steps:
+      tf_feed = TFNode.DataFeed(ctx.mgr, args.mode == "train")
+      while not sv.should_stop() and not tf_feed.should_stop() and step < args.steps:
         # Run a training step asynchronously.
         # See `tf.train.SyncReplicasOptimizer` for additional details on how to
         # perform *synchronous* training.
 
         # using feed_dict
-        batch_xs, batch_ys = feed_dict(tfnode.next_batch(batch_size))
+        batch_xs, batch_ys = feed_dict(tf_feed.next_batch(batch_size))
         feed = {x: batch_xs, y_: batch_ys}
 
         if len(batch_xs) > 0:
@@ -146,11 +146,11 @@ def map_fun(args, ctx):
             labels, preds, acc = sess.run([label, prediction, accuracy], feed_dict=feed)
 
             results = ["{0} Label: {1}, Prediction: {2}".format(datetime.now().isoformat(), l, p) for l,p in zip(labels,preds)]
-            tfnode.batch_results(results)
+            tf_feed.batch_results(results)
             print("acc: {0}".format(acc))
 
       if sv.should_stop() or step >= args.steps:
-        tfnode.terminate()
+        tf_feed.terminate()
 
     # Ask for all the services to stop.
     print("{0} stopping supervisor".format(datetime.now().isoformat()))

@@ -143,7 +143,7 @@ def terminate(mgr, qname='input'):
             logging.info("dropped {0} items from queue".format(count))
             done = True
 
-class TFNode(object):
+class DataFeed(object):
     def __init__(self, mgr, train_mode=True, qname_in='input', qname_out='output'):
         self.mgr = mgr
         self.train_mode = train_mode
